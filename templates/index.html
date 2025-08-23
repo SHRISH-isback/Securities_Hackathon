@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corporate Announcement Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {% extends "base.html" %}
+
+    {% block title %}Home - SkapSec{% endblock %}
+
+    {% block content %}
+    <div class="hero-section">
+        <h1>Welcome to SkapSec</h1>
+        <p class="subtitle">Your first line of defense against securities fraud.</p>
+        <a href="{{ url_for('analyzer_page') }}" class="cta-button">Analyze an Announcement</a>
+    </div>
+
+    <div class="features-section">
+        <h2>How We Protect You</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>Real-Time Analysis</h3>
+                <p>We use live financial data and news APIs to assess the credibility of corporate announcements.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Data-Driven Scoring</h3>
+                <p>Our engine provides a weighted credibility score based on multiple factors, not just keywords.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Investor Protection</h3>
+                <p>Aligned with SEBI's Safe Space initiative to safeguard retail investors from market manipulation.</p>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+</body>
+</html>

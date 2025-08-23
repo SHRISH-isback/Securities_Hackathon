@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SkapSec{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="page-container">
+        {% include '_includes/header.html' %}
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+        {% include '_includes/footer.html' %}
+    </div>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

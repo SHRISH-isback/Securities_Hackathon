@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Announcement Analyzer - SkapSec{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Corporate Announcement Analyzer</h1>
+    <p>Enter a company name, stock symbol, and the announcement text for a real-time credibility analysis.</p>
+
+    <form id="analysis-form">
+        <label for="company_name">Company Name:</label>
+        <input type="text" id="company_name" name="company_name" required>
+
+        <label for="symbol">Stock Symbol (e.g., GOOGL):</label>
+        <input type="text" id="symbol" name="symbol" required>
+        
+        <label for="announcement_text">Announcement Text:</label>
+        <textarea id="announcement_text" name="announcement_text" rows="8" required></textarea>
+        
+        <input type="submit" value="Analyze Announcement">
+    </form>
+
+    <div id="loader" style="display: none;"></div>
+    <div id="result-container" style="display: none;">
+        <!-- Results will be injected here by JavaScript -->
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+{% endblock %}
