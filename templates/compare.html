@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Announcements - SkapSec{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Compare Two Announcements</h1>
+    <p>Analyze two announcements side-by-side to see which is more credible.</p>
+
+    <form id="compare-form">
+        <div class="dashboard" style="grid-template-columns: 1fr 1fr;">
+            <div>
+                <h3>Announcement A</h3>
+                <label for="left_company_name">Company Name</label>
+                <input type="text" id="left_company_name" name="left_company_name" required>
+                <label for="left_symbol">Stock Symbol</label>
+                <input type="text" id="left_symbol" name="left_symbol" required>
+                <label for="left_announcement_text">Text</label>
+                <textarea id="left_announcement_text" name="left_announcement_text" rows="6" required></textarea>
+            </div>
+            <div>
+                <h3>Announcement B</h3>
+                <label for="right_company_name">Company Name</label>
+                <input type="text" id="right_company_name" name="right_company_name" required>
+                <label for="right_symbol">Stock Symbol</label>
+                <input type="text" id="right_symbol" name="right_symbol" required>
+                <label for="right_announcement_text">Text</label>
+                <textarea id="right_announcement_text" name="right_announcement_text" rows="6" required></textarea>
+            </div>
+        </div>
+        <div style="margin-top: 16px; text-align: center;">
+            <input type="submit" value="Compare">
+        </div>
+    </form>
+
+    <div id="compare-loader" style="display:none;"><div id="loader"></div></div>
+    <div id="compare-result" style="display:none;"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function(){
+    const form = document.getElementById('compare-form');
+    const loader = document.getElementById('compare-loader');
+    const out = document.getElementById('compare-result');
+
+    if (!form) return;
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+        loader.style.display = 'block';
+        out.style.display = 'none';
+        out.classList.remove('visible');
+        try {
+            const resp = await fetch('/api/compare', { method: 'POST', body: fd });
+            const data = await resp.json();
+            renderCompare(data);
+        } catch(err) {
+            out.innerHTML = '<p class="error">Comparison failed.</p>';
+        } finally {
+            loader.style.display = 'none';
+            out.style.display = 'block';
+            setTimeout(()=> out.classList.add('visible'), 10);
+        }
+    });
+
+    function renderPanel(title, r){
+        if (!r || r.error) return `<div class="error">${r && r.error ? r.error : 'No result'}</div>`;
+        const flags = (r.flags && r.flags.length) ? `<ul>${r.flags.map(f=>`<li>${f}</li>`).join('')}</ul>` : '<p>No flags.</p>';
+        const chips = (r.ml_insights && r.ml_insights.top_terms && r.ml_insights.top_terms.length)
+            ? `<div class="ml-insights"><h3>ML Top Terms</h3><div class="chips">${r.ml_insights.top_terms.map(t=>`<span class="chip">${t.term} · ${Math.round(t.weight*100)}%</span>`).join('')}</div></div>`
+            : '';
+        return `
+            <div class="score-widget">
+                <div class="score-circle score-${r.credibility.toLowerCase()}"><span>${r.score}</span></div>
+                <p class="credibility-text">${r.credibility}</p>
+            </div>
+            <div>
+                <h3>${title}</h3>
+                ${flags}
+                ${chips}
+            </div>
+        `;
+    }
+
+    function renderCompare(data){
+        if (data.error) { out.innerHTML = `<p class='error'>${data.error}</p>`; return; }
+        out.innerHTML = `
+            <div class="dashboard" style="grid-template-columns: 1fr 1fr;">
+                <div class="dashboard" style="grid-template-columns: 1fr 2fr;">${renderPanel('Announcement A', data.left)}</div>
+                <div class="dashboard" style="grid-template-columns: 1fr 2fr;">${renderPanel('Announcement B', data.right)}</div>
+            </div>
+        `;
+    }
+})();
+</script>
+{% endblock %}

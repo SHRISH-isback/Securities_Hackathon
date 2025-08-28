@@ -4,7 +4,12 @@
         <ul>
             <li><a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}">Home</a></li>
             <li><a href="{{ url_for('analyzer_page') }}" class="{{ 'active' if request.endpoint == 'analyzer_page' else '' }}">Analyzer</a></li>
+            <li><a href="{{ url_for('compare_page') }}" class="{{ 'active' if request.endpoint == 'compare_page' else '' }}">Compare</a></li>
             <li><a href="{{ url_for('about_page') }}" class="{{ 'active' if request.endpoint == 'about_page' else '' }}">About</a></li>
         </ul>
+        <div class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" role="button">
+            <span id="theme-icon">🌙</span>
+            <span id="theme-label">Dark</span>
+        </div>
     </nav>
 </header>

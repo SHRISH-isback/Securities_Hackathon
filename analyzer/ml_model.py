@@ -58,3 +58,34 @@ class AnnouncementClassifier:
         # Predict the probability of the "suspicious" class (label 1)
         probability = self.model.predict_proba(text_vector)[0][1]
         return probability
+
+    def explain_top_terms(self, text: str, top_k: int = 5):
+        """
+        Returns the top contributing terms for the suspicious class using a
+        simple linear model explanation: term_weight * tfidf_value.
+
+        Args:
+            text: The announcement text to analyze.
+            top_k: Number of top terms to return.
+
+        Returns:
+            List of dicts: [{ 'term': str, 'weight': float }]
+        """
+        text_vector = self.vectorizer.transform([text])
+        # For LogisticRegression, coef_[0] corresponds to the positive class weights if binary
+        class_index = 1  # suspicious class
+        coefs = self.model.coef_[0]
+        feature_names = self.vectorizer.get_feature_names_out()
+
+        # Compute contribution per feature: weight * value
+        contributions = text_vector.multiply(coefs).toarray()[0]
+
+        # Select top positive contributions
+        indexed = [(feature_names[i], contributions[i]) for i in range(len(feature_names)) if contributions[i] > 0]
+        indexed.sort(key=lambda x: x[1], reverse=True)
+        top = indexed[:top_k]
+
+        # Normalize weights to 0..1 for display
+        max_contrib = top[0][1] if top else 1.0
+        normalized = [{"term": term, "weight": (contrib / max_contrib) if max_contrib > 0 else 0.0} for term, contrib in top]
+        return normalized

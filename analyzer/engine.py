@@ -24,6 +24,7 @@ def analyze_announcement(text, company_name, symbol):
     """
     score = 100
     all_flags = []
+    deductions = []
 
     # 1. Rule-based checks
     for check_function, weight in RULE_WEIGHTS.items():
@@ -39,15 +40,21 @@ def analyze_announcement(text, company_name, symbol):
         if flags:
             score -= weight
             all_flags.extend(flags)
+            for flag in flags:
+                deductions.append({"reason": flag, "penalty": weight, "category": "Rule-Based"})
 
     # 2. ML model prediction
     suspicion_prob = classifier.predict_suspicion(text)
+    top_terms = classifier.explain_top_terms(text, top_k=6)
     
     # The score penalty is proportional to the model's suspicion probability
-    score -= int(ML_SUSPICION_WEIGHT * suspicion_prob)
+    ml_penalty = int(ML_SUSPICION_WEIGHT * suspicion_prob)
+    score -= ml_penalty
     
     if suspicion_prob > ML_FLAG_THRESHOLD:
-        all_flags.append(f"ML model flags content as {int(suspicion_prob * 100)}% suspicious.")
+        flag_text = f"ML model flags content as {int(suspicion_prob * 100)}% suspicious."
+        all_flags.append(flag_text)
+        deductions.append({"reason": flag_text, "penalty": ml_penalty, "category": "AI Analysis"})
 
     # Determine credibility level based on the final score
     credibility = "High"
@@ -59,4 +66,16 @@ def analyze_announcement(text, company_name, symbol):
     # Ensure score doesn't go below zero
     score = max(0, score)
 
-    return {"score": score, "credibility": credibility, "flags": all_flags}
+    return {
+        "score": score, 
+        "credibility": credibility, 
+        "flags": all_flags,
+        "breakdown": {
+            "initial_score": 100,
+            "deductions": deductions
+        },
+        "ml_insights": {
+            "suspicion_probability": suspicion_prob,
+            "top_terms": top_terms
+        }
+    }

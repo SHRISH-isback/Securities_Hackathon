@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Corporate Announcement Analyzer</title>
+    <title>SkapSec</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -32,6 +32,14 @@
             <div class="feature-card">
                 <h3>Investor Protection</h3>
                 <p>Aligned with SEBI's Safe Space initiative to safeguard retail investors from market manipulation.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Try Examples</h3>
+                <p>Jump in with sample announcements to see the analyzer in action.</p>
+                <div class="button-group">
+                    <a class="cta-button" href="{{ url_for('analyzer_page') }}?company_name=Acme%20Corp&symbol=ACME&announcement_text=We%20are%20pleased%20to%20announce%20a%20new%20strategic%20partnership%20with%20Globex%20Inc.%20Quarterly%20earnings%20in%20line%20with%20expectations.">Legit Example</a>
+                    <a class="cta-button" href="{{ url_for('analyzer_page') }}?company_name=Alpha%20Invest&symbol=ALPH&announcement_text=Unprecedented%20returns%20guaranteed!%20Act%20now%20for%20insider%20opportunity%20to%20skyrocket%20your%20wealth%20with%20no%20risk.">Suspicious Example</a>
+                </div>
             </div>
         </div>
     </div>

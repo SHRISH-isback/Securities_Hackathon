@@ -7,3 +7,5 @@ python-dotenv
 newsapi-python
 pandas
 gunicorn
+Flask-Cors
+Flask-Caching
