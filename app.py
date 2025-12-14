@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
+import os
 from flask_caching import Cache
 from analyzer.engine import analyze_announcement
 
@@ -13,7 +14,11 @@ app.config["CACHE_DEFAULT_TIMEOUT"] = 300  # Cache results for 5 minutes
 cache = Cache(app)
 
 # Enable CORS for the React frontend
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+frontend_origin = os.environ.get("FRONTEND_ORIGIN", "*")
+CORS(app, resources={r"/api/*": {"origins": frontend_origin}})
+
+# Disable Flask caching for Vercel deployment (serverless functions are stateless)
+app.config["CACHE_TYPE"] = "null" if os.environ.get("VERCEL") else "simple"
 
 @app.route("/")
 def index():
@@ -32,7 +37,6 @@ def compare_page():
     return render_template("compare.html")
 
 @app.route("/api/analyze", methods=["POST"])
-@cache.cached(timeout=300, key_prefix='analysis_result')
 def analyze_api():
     company_name = request.form.get("company_name")
     symbol = request.form.get("symbol")

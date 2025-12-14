@@ -1,3 +1,83 @@
+# SkapSec
+
+## Quick Deploy to Vercel
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YOUR-USERNAME/YOUR-REPO)
+
+### One-Click Deployment Steps:
+
+1. Click the "Deploy with Vercel" button above
+2. Connect your GitHub account
+3. Vercel will automatically detect the configuration
+4. Click "Deploy"
+5. Your backend API will be live at `https://your-project.vercel.app`
+
+### Manual Deployment to Vercel
+
+**Prerequisites:**
+- Vercel account (sign up at [vercel.com](https://vercel.com))
+- Vercel CLI: `npm install -g vercel`
+
+**Deploy Backend:**
+```bash
+# From the project root directory
+vercel
+
+# For production deployment
+vercel --prod
+```
+
+**Environment Variables (Optional):**
+Set these in your Vercel project dashboard:
+- `FRONTEND_ORIGIN` - Your frontend URL (e.g., `https://your-frontend.vercel.app`)
+- Add any API keys if needed (e.g., `ALPHA_VANTAGE_API_KEY`, `NEWS_API_KEY`)
+
+**Deploy Frontend (if using the React frontend):**
+```bash
+cd frontend
+vercel
+
+# For production
+vercel --prod
+```
+Set frontend environment variable:
+- `VITE_API_BASE` - Your backend URL (e.g., `https://your-backend.vercel.app`)
+
+## Local Development
+
+- Backend (Flask):
+  - Python 3.10+
+  - Install deps: `pip install -r requirements.txt`
+  - Run: `python app.py` (starts on http://localhost:5000)
+
+- Frontend (React):
+  - Node 18+
+  - `cd frontend && npm install`
+  - Create `.env` (see `.env.example`):
+    - `VITE_API_BASE=http://localhost:5000`
+  - Run: `npm run dev` (starts on http://localhost:3000)
+
+## Deployment (Vercel)
+
+This repo supports deploying backend and frontend as two Vercel projects.
+
+1) Backend (Flask API)
+- Project Root: repository root (contains `vercel.json`)
+- Build: handled by `@vercel/python`
+- Environment Variables:
+  - `FRONTEND_ORIGIN=https://YOUR-REACT-APP.vercel.app`
+- Output: `https://YOUR-BACKEND.vercel.app`
+
+2) Frontend (React)
+- Project Root: `frontend/`
+- `frontend/vercel.json` sets SPA rewrites
+- Environment Variables:
+  - `VITE_API_BASE=https://YOUR-BACKEND.vercel.app`
+
+### Notes
+- CORS: Flask reads `FRONTEND_ORIGIN` to allow the React domain.
+- Local dev uses Vite proxy (port 3000 -> 5000) only in dev. In production, React calls the backend using `VITE_API_BASE`.
+
 # SkapSec: AI-Powered Corporate Announcement Analyzer
 
 ![SkapSec Banner](https://user-images.githubusercontent.com/80538469/211161334-8b663f69-8d09-4ba8-972b-c03ba01a40a2.png)
