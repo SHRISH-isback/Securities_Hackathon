@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
 from flask_caching import Cache
@@ -79,6 +79,11 @@ def compare_api():
         return jsonify({"left": left_result, "right": right_result})
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+@app.route("/favicon.ico")
+def favicon():
+    """Return empty response for favicon to avoid 404 errors"""
+    return "", 204
 
 if __name__ == "__main__":
     app.run(debug=True)
