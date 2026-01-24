@@ -16,4 +16,3 @@ node_modules/
 # Ignore environment files
 
 .venv
-*.env
