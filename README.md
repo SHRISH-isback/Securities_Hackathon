@@ -1,181 +1,163 @@
-# SkapSec
+# InsightGuard
 
-## Quick Deploy to Vercel
+## AI-Powered Corporate Announcement Analyzer
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YOUR-USERNAME/YOUR-REPO)
+> Your first line of defense against securities fraud
 
-### One-Click Deployment Steps:
+## 📋 Overview
 
-1. Click the "Deploy with Vercel" button above
-2. Connect your GitHub account
-3. Vercel will automatically detect the configuration
-4. Click "Deploy"
-5. Your backend API will be live at `https://your-project.vercel.app`
+**InsightGuard** is a web application designed to protect retail investors by providing real-time credibility analysis of corporate announcements. Aligned with SEBI's Safe Space initiative, this tool leverages a hybrid AI model to flag potentially fraudulent or misleading information, empowering users to make more informed investment decisions.
 
-### Manual Deployment to Vercel
+## ✨ Key Features
 
-**Prerequisites:**
-- Vercel account (sign up at [vercel.com](https://vercel.com))
-- Vercel CLI: `npm install -g vercel`
+- **🤖 Hybrid Analysis Engine:** Combines rule-based checks with a machine learning model (scikit-learn) to provide nuanced credibility scoring
+- **📊 Real-Time Data Integration:** Cross-verifies announcement claims against live financial data from Alpha Vantage and real-time news sentiment from News API
+- **🎯 Comprehensive Scoring:** Generates weighted credibility scores (0-100) and raises specific flags based on sensational language, financial mismatches, and red flags
+- **🎨 Modern Interactive UI:** Multi-page web interface with vibrant, responsive design and smooth animations
+- **🛡️ Investor Protection Focus:** Specifically designed to identify market manipulation tactics like pressure tactics, vagueness, and unverifiable claims
 
-**Deploy Backend:**
-```bash
-# From the project root directory
-vercel
+## 🔍 How It Works
 
-# For production deployment
-vercel --prod
-```
+1. **User Input:** Provide company name, stock symbol, and announcement text
+2. **Rule-Based Checks:** 
+   - Scans for sensational or overly promotional language
+   - Verifies claims against recent news
+   - Checks for financial inconsistencies using live market data
+   - Identifies high-pressure tactics or guaranteed returns
+3. **Machine Learning Analysis:** Text is analyzed by a trained LogisticRegression model for suspicious patterns
+4. **Credibility Score:** Final score calculated by deducting points from 100 based on triggered flags
+5. **Results Display:** Intuitive dashboard showing score, credibility level, and specific flags
 
-**Environment Variables (Optional):**
-Set these in your Vercel project dashboard:
-- `FRONTEND_ORIGIN` - Your frontend URL (e.g., `https://your-frontend.vercel.app`)
-- Add any API keys if needed (e.g., `ALPHA_VANTAGE_API_KEY`, `NEWS_API_KEY`)
+## 🛠️ Technology Stack
 
-**Deploy Frontend (if using the React frontend):**
-```bash
-cd frontend
-vercel
-
-# For production
-vercel --prod
-```
-Set frontend environment variable:
-- `VITE_API_BASE` - Your backend URL (e.g., `https://your-backend.vercel.app`)
-
-## Local Development
-
-- Backend (Flask):
-  - Python 3.10+
-  - Install deps: `pip install -r requirements.txt`
-  - Run: `python app.py` (starts on http://localhost:5000)
-
-- Frontend (React):
-  - Node 18+
-  - `cd frontend && npm install`
-  - Create `.env` (see `.env.example`):
-    - `VITE_API_BASE=http://localhost:5000`
-  - Run: `npm run dev` (starts on http://localhost:3000)
-
-## Deployment (Vercel)
-
-This repo supports deploying backend and frontend as two Vercel projects.
-
-1) Backend (Flask API)
-- Project Root: repository root (contains `vercel.json`)
-- Build: handled by `@vercel/python`
-- Environment Variables:
-  - `FRONTEND_ORIGIN=https://YOUR-REACT-APP.vercel.app`
-- Output: `https://YOUR-BACKEND.vercel.app`
-
-2) Frontend (React)
-- Project Root: `frontend/`
-- `frontend/vercel.json` sets SPA rewrites
-- Environment Variables:
-  - `VITE_API_BASE=https://YOUR-BACKEND.vercel.app`
-
-### Notes
-- CORS: Flask reads `FRONTEND_ORIGIN` to allow the React domain.
-- Local dev uses Vite proxy (port 3000 -> 5000) only in dev. In production, React calls the backend using `VITE_API_BASE`.
-
-# SkapSec: AI-Powered Corporate Announcement Analyzer
-
-![SkapSec Banner](https://user-images.githubusercontent.com/80538469/211161334-8b663f69-8d09-4ba8-972b-c03ba01a40a2.png)
-
-
-**SkapSec** is a web application designed to protect retail investors by providing a real-time credibility analysis of corporate announcements. Aligned with SEBI's Safe Space initiative, this tool leverages a hybrid AI model to flag potentially fraudulent or misleading information, empowering users to make more informed investment decisions.
-
-## Key Features
-
-- **Hybrid Analysis Engine:** Combines rule-based checks with a machine learning model (`scikit-learn`) to provide a nuanced credibility score.
-- **Real-Time Data Integration:** Cross-verifies announcement claims against live financial data from **Alpha Vantage** and real-time news sentiment from the **News API**.
-- **Comprehensive Scoring:** Generates a weighted credibility score (from 0 to 100) and raises specific flags based on sensational language, financial mismatches, and other red flags.
-- **Modern & Interactive UI:** A multi-page web interface built with **Flask**, featuring a vibrant, responsive design, smooth animations, and a clear presentation of analysis results.
-- **Investor Protection Focus:** Specifically designed to identify tactics commonly used in market manipulation, such as pressure tactics, vagueness, and unverifiable claims.
-
-## How It Works
-
-1.  **User Input:** The user provides the company name, stock symbol, and the text of the corporate announcement.
-2.  **Rule-Based Checks:** The system first runs a series of pre-defined checks:
-    -   Scans for sensational or overly promotional language.
-    -   Verifies claims (e.g., partnerships) against recent news.
-    -   Checks for financial inconsistencies using live market data.
-    -   Identifies high-pressure tactics or guarantees of returns.
-3.  **Machine Learning Analysis:** The announcement text is then fed into a trained `LogisticRegression` model, which calculates the probability of the text being suspicious based on patterns learned from historical data.
-4.  **Credibility Score Calculation:** A final credibility score is computed by deducting points from a starting score of 100. The penalty for each triggered flag is determined by its weight, with the ML model's suspicion probability also contributing to the final score.
-5.  **Results Display:** The result is presented in an intuitive dashboard, showing the final score, a credibility level (High, Medium, or Low), and a list of all the specific flags that were raised.
-
-## Technology Stack
-
-- **Backend:** Python, Flask
+- **Backend:** Python, Flask, Flask-CORS
 - **Machine Learning:** Scikit-learn, Pandas
+- **Frontend:** React, TypeScript, Vite
 - **Data APIs:**
-    -   [Alpha Vantage API](https://www.alphavantage.co/) for financial data.
-    -   [News API](https://newsapi.org/) for news sentiment analysis.
-- **Frontend:** HTML, CSS, JavaScript
-- **Deployment:** (Not yet implemented, but suitable for platforms like Heroku, Vercel, or AWS)
+  - [Alpha Vantage API](https://www.alphavantage.co/) - Financial data
+  - [News API](https://newsapi.org/) - News sentiment analysis
 
-## Setup and Installation
+## 🚀 Quick Start
 
-Follow these steps to run the project locally:
+### Prerequisites
 
-**1. Clone the Repository:**
+- Python 3.9+
+- Node.js 18+
+- API keys for Alpha Vantage and News API
+
+### Installation
+
+**1. Clone the Repository**
 ```bash
-git clone https://github.com/your-username/SkapSec.git
-cd SkapSec
+git clone https://github.com/your-username/InsightGuard.git
+cd InsightGuard
 ```
 
-**2. Create and Activate a Virtual Environment:**
+**2. Backend Setup**
 ```bash
-# For Linux/macOS
-python3 -m venv .venv
-source .venv/bin/activate
-
-# For Windows
+# Create and activate virtual environment
 python -m venv .venv
-.venv\Scripts\activate
-```
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-**3. Install Dependencies:**
-```bash
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-**4. Set Up Environment Variables:**
-Create a `.env` file in the root directory and add your API keys:
-```
-ALPHA_VANTAGE_API_KEY="YOUR_ALPHA_VANTAGE_KEY"
-NEWS_API_KEY="YOUR_NEWS_API_KEY"
+**3. Environment Configuration**
+
+Create a `.env` file in the root directory:
+```env
+ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key
+NEWS_API_KEY=your_news_api_key
+FRONTEND_ORIGIN=http://localhost:3000
 ```
 
-**5. Run the Application:**
+**4. Frontend Setup**
 ```bash
-flask run
-```
-The application will be available at `http://127.0.0.1:5000`.
+cd frontend
+npm install
 
-## Project Structure
+# Create frontend/.env file
+echo "VITE_API_BASE=http://localhost:5000" > .env
 ```
-/
-├── analyzer/             # Core analysis logic
-│   ├── __init__.py
-│   ├── checks.py         # Rule-based checks
-│   ├── data.py           # API data fetching
-│   ├── engine.py         # Main analysis engine
-│   └── ml_model.py       # ML classifier
-├── static/               # CSS and JavaScript files
-├── templates/            # HTML templates
-│   ├── _includes/        # Reusable partials (header, footer)
-│   ├── about.html
-│   ├── analyzer.html
-│   ├── base.html
-│   └── index.html
-├── .env                  # API keys (local)
-├── app.py                # Flask application routes
-├── requirements.txt      # Python dependencies
+
+### Running the Application
+
+**Terminal 1 - Backend:**
+```bash
+# From project root
+python app.py
+# Server starts at http://localhost:5000
+```
+
+**Terminal 2 - Frontend:**
+```bash
+cd frontend
+npm run dev
+# Application opens at http://localhost:3000
+```
+
+## 📁 Project Structure
+
+```
+InsightGuard/
+├── analyzer/              # Core analysis logic
+│   ├── checks.py         # Rule-based validation checks
+│   ├── data.py           # API data fetching utilities
+│   ├── engine.py         # Main analysis orchestration
+│   └── ml_model.py       # Machine learning classifier
+├── api/                  # Serverless API entry point
+│   └── index.py
+├── frontend/             # React application
+│   ├── src/
+│   │   ├── main.tsx
+│   │   └── ui/
+│   │       ├── App.tsx
+│   │       ├── styles.css
+│   │       └── pages/
+│   │           ├── Home.tsx
+│   │           ├── Analyzer.tsx
+│   │           ├── Compare.tsx
+│   │           └── About.tsx
+│   ├── package.json
+│   └── vite.config.js
+├── static/               # Legacy static assets
+├── templates/            # Flask HTML templates
+├── app.py               # Flask application entry point
+├── requirements.txt     # Python dependencies
 └── README.md
 ```
 
-## Disclaimer
+## 🎯 Usage Example
 
-The analysis provided by SkapSec is for informational purposes only and should not be considered financial advice. Always conduct your own thorough research before making any investment decisions.
+1. Navigate to the Analyzer page
+2. Enter company details:
+   - **Company Name:** Acme Corp
+   - **Stock Symbol:** ACME
+   - **Announcement:** "We are pleased to announce a new strategic partnership..."
+3. Click "Analyze"
+4. Review the credibility score and detailed analysis
+
+### Sample Scenarios
+
+**Legitimate Announcement:**
+> "We are pleased to announce a new strategic partnership with Globex Inc. Quarterly earnings in line with expectations."
+
+**Suspicious Announcement:**
+> "Unprecedented returns guaranteed! Act now for insider opportunity to skyrocket your wealth with no risk."
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## ⚠️ Disclaimer
+
+The analysis provided by InsightGuard is for informational purposes only and should not be considered financial advice. Always conduct your own thorough research and consult with qualified financial advisors before making any investment decisions.
+
+## 📄 License
+
+This project is licensed under the terms specified in the LICENSE file.
+
+---
+
+**Built with ❤️ for SEBI's Safe Space Initiative**

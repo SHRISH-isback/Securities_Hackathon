@@ -1,8 +1,21 @@
 {
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/api/index"
+      "src": "api/index.py",
+      "use": "@vercel/python"
     }
-  ]
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.py"
+    }
+  ],
+  "env": {
+    "ALPHAVANTAGE_API_KEY": "@alphavantage_api_key",
+    "NEWS_API_KEY": "@news_api_key",
+    "FRONTEND_ORIGIN": "*"
+  }
 }
+
