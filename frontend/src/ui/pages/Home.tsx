@@ -7,7 +7,7 @@ export default function Home(){
   return (
     <>
       <div className="hero-section">
-        <h1>Welcome to SkapSec</h1>
+        <h1>Welcome to InsightGuard</h1>
         <p className="subtitle">Your first line of defense against securities fraud.</p>
         <Link className="cta-button" to="/analyzer">Analyze an Announcement</Link>
       </div>

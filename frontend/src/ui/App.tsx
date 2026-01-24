@@ -18,7 +18,7 @@ export default function App() {
     <div className="page-container">
       <header>
         <nav>
-          <Link to="/" className="logo">SkapSec</Link>
+          <Link to="/" className="logo">InsightGuard</Link>
           <ul>
             <li><Link to="/" className={location.pathname === '/' ? 'active' : ''}>Home</Link></li>
             <li><Link to="/analyzer" className={location.pathname.startsWith('/analyzer') ? 'active' : ''}>Analyzer</Link></li>
@@ -35,7 +35,7 @@ export default function App() {
         <Outlet />
       </main>
       <footer>
-        <p>© SkapSec</p>
+        <p>© InsightGuard</p>
       </footer>
       <div id="page-transition" aria-hidden="true"></div>
     </div>
