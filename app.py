@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 from flask_caching import Cache
@@ -24,34 +24,16 @@ app.config["CACHE_TYPE"] = "null" if os.environ.get("VERCEL") else "simple"
 # The frontend is deployed separately
 @app.route("/")
 def index():
-    if os.environ.get("VERCEL"):
-        return jsonify({
-            "message": "InsightGuard API",
-            "version": "1.0",
-            "endpoints": {
-                "analyze": "/api/analyze",
-                "compare": "/api/compare"
-            }
-        })
-    return render_template("index.html")
-
-@app.route("/analyzer")
-def analyzer_page():
-    if os.environ.get("VERCEL"):
-        return jsonify({"error": "This endpoint is not available on Vercel. Use the React frontend."}), 404
-    return render_template("analyzer.html")
-
-@app.route("/about")
-def about_page():
-    if os.environ.get("VERCEL"):
-        return jsonify({"error": "This endpoint is not available on Vercel. Use the React frontend."}), 404
-    return render_template("about.html")
-
-@app.route("/compare")
-def compare_page():
-    if os.environ.get("VERCEL"):
-        return jsonify({"error": "This endpoint is not available on Vercel. Use the React frontend."}), 404
-    return render_template("compare.html")
+    return jsonify({
+        "message": "InsightGuard API",
+        "version": "1.0",
+        "status": "running",
+        "endpoints": {
+            "health": "/api/health",
+            "analyze": "/api/analyze (POST)",
+            "compare": "/api/compare (POST)"
+        }
+    })
 
 @app.route("/api/health")
 def health_check():
