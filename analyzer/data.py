@@ -19,7 +19,7 @@ def get_company_financials(symbol):
     if not ALPHAVANTAGE_API_KEY or ALPHAVANTAGE_API_KEY == "YOUR_API_KEY_HERE":
         # Return mock data if API key is not set
         print("Warning: Alpha Vantage API key not set. Using mock data.")
-        return {"revenue_growth": "N/A", "profit_margin": "N/A"}
+        return {"revenue_growth": "N/A", "profit_margin": "N/A", "eps": "N/A", "revenue_ttm": "N/A"}
 
     params = {
         "function": "OVERVIEW",
@@ -32,13 +32,15 @@ def get_company_financials(symbol):
         data = response.json()
         
         # Extract relevant metrics
-        # Note: Alpha Vantage's free tier may not provide direct revenue growth.
-        # We'll use ProfitMargin as an example.
         profit_margin = data.get("ProfitMargin", "N/A")
+        eps = data.get("EPS", "N/A")
+        revenue_ttm = data.get("RevenueTTM", "N/A")
         
         return {
-            "revenue_growth": "N/A", # Placeholder as this metric isn't in OVERVIEW
-            "profit_margin": profit_margin
+            "revenue_growth": "N/A",  # Placeholder as this metric isn't in OVERVIEW
+            "profit_margin": profit_margin,
+            "eps": eps,
+            "revenue_ttm": revenue_ttm,
         }
     except requests.exceptions.RequestException as e:
         print(f"Error fetching data from Alpha Vantage: {e}")

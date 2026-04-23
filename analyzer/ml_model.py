@@ -11,8 +11,8 @@ class AnnouncementClassifier:
     small, representative dataset to demonstrate the integration of ML.
     """
     def __init__(self):
-        self.vectorizer = TfidfVectorizer(stop_words='english')
-        self.model = LogisticRegression()
+        self.vectorizer = TfidfVectorizer(stop_words='english', ngram_range=(1, 3))
+        self.model = LogisticRegression(class_weight='balanced')
         self._train_model()
 
     def _train_model(self):

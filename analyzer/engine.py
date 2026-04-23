@@ -1,5 +1,7 @@
 from . import checks
 from .ml_model import AnnouncementClassifier
+from .data import get_company_financials
+import re
 
 # Instantiate the classifier. In a real app, this might be loaded once at startup.
 classifier = AnnouncementClassifier()
@@ -16,7 +18,48 @@ RULE_WEIGHTS = {
 
 # Weight for the ML model's prediction
 ML_SUSPICION_WEIGHT = 35
-ML_FLAG_THRESHOLD = 0.6 # Probability threshold to raise a flag
+ML_FLAG_THRESHOLD = 0.6  # Probability threshold to raise a flag
+
+# Penalty for a financial mismatch (claims high profits but EPS is negative)
+FINANCIAL_MISMATCH_WEIGHT = 30
+
+_HIGH_PROFIT_PATTERN = re.compile(
+    r"(high profit|record profit|massive profit|huge profit|profit surge|profit skyrocket|"
+    r"strong profit|big profit|enormous profit|enormous gain|record earning|high earning|"
+    r"exceptional profit|extraordinary profit)",
+    re.IGNORECASE,
+)
+
+
+def _check_financial_mismatch(text, symbol):
+    """
+    Compares 'high profits' claims in the announcement text against the
+    Alpha Vantage EPS value. Returns a list of flags.
+    """
+    flags = []
+    if not _HIGH_PROFIT_PATTERN.search(text):
+        return flags
+
+    financials = get_company_financials(symbol)
+    if not financials:
+        return flags
+
+    eps = financials.get("eps", "N/A")
+    if eps in ("N/A", None, ""):
+        return flags
+
+    try:
+        eps_value = float(eps)
+    except (ValueError, TypeError):
+        return flags
+
+    if eps_value < 0:
+        flags.append(
+            f"Financial Mismatch: announcement claims high profits but Alpha Vantage "
+            f"reports a negative EPS of {eps_value:.2f}."
+        )
+    return flags
+
 
 def analyze_announcement(text, company_name, symbol):
     """
@@ -43,7 +86,15 @@ def analyze_announcement(text, company_name, symbol):
             for flag in flags:
                 deductions.append({"reason": flag, "penalty": weight, "category": "Rule-Based"})
 
-    # 2. ML model prediction
+    # 2. Financial mismatch check (Alpha Vantage EPS vs. "high profits" claims)
+    mismatch_flags = _check_financial_mismatch(text, symbol)
+    if mismatch_flags:
+        score -= FINANCIAL_MISMATCH_WEIGHT
+        all_flags.extend(mismatch_flags)
+        for flag in mismatch_flags:
+            deductions.append({"reason": flag, "penalty": FINANCIAL_MISMATCH_WEIGHT, "category": "Financial Mismatch"})
+
+    # 3. ML model prediction
     suspicion_prob = classifier.predict_suspicion(text)
     top_terms = classifier.explain_top_terms(text, top_k=6)
     
