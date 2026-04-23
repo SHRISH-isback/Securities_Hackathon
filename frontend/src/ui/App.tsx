@@ -1,43 +1,55 @@
 import React from 'react'
 import { Outlet, Link, useLocation } from 'react-router-dom'
+import { Shield } from 'lucide-react'
 
 export default function App() {
-  const [theme, setTheme] = React.useState<string>(() =>
-    localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-  )
-  React.useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('theme', theme)
-  }, [theme])
   const location = useLocation()
+
   React.useEffect(() => {
     const el = document.getElementById('page-transition')
-    if (el) { el.classList.add('active'); setTimeout(()=> el.classList.remove('active'), 250) }
+    if (el) { el.classList.add('active'); setTimeout(() => el.classList.remove('active'), 250) }
   }, [location])
+
   return (
-    <div className="page-container">
-      <header>
-        <nav>
-          <Link to="/" className="logo">InsightGuard</Link>
-          <ul>
-            <li><Link to="/" className={location.pathname === '/' ? 'active' : ''}>Home</Link></li>
-            <li><Link to="/analyzer" className={location.pathname.startsWith('/analyzer') ? 'active' : ''}>Analyzer</Link></li>
-            <li><Link to="/compare" className={location.pathname.startsWith('/compare') ? 'active' : ''}>Compare</Link></li>
-            <li><Link to="/about" className={location.pathname.startsWith('/about') ? 'active' : ''}>About</Link></li>
+    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
+      <header className="nav-glass px-6 md:px-10 py-4">
+        <nav className="max-w-6xl mx-auto flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 text-blue-400 font-bold text-xl" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <Shield className="w-6 h-6" />
+            InsightGuard
+          </Link>
+          <ul className="hidden md:flex items-center gap-8 list-none m-0 p-0">
+            {[
+              { to: '/', label: 'Home', exact: true },
+              { to: '/analyzer', label: 'Analyzer' },
+              { to: '/compare', label: 'Compare' },
+              { to: '/about', label: 'About' },
+            ].map(({ to, label, exact }) => {
+              const isActive = exact ? location.pathname === to : location.pathname.startsWith(to)
+              return (
+                <li key={to}>
+                  <Link
+                    to={to}
+                    className={`text-sm font-medium transition-colors ${isActive ? 'text-blue-400' : 'text-slate-400 hover:text-slate-100'}`}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              )
+            })}
           </ul>
-          <div className="theme-toggle" role="button" aria-label="Toggle theme" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-            <span>{theme === 'dark' ? '🌞' : '🌙'}</span>
-            <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
-          </div>
         </nav>
       </header>
-      <main>
+
+      <main className="flex-1 px-4 py-8">
         <Outlet />
       </main>
-      <footer>
-        <p>© InsightGuard</p>
+
+      <footer className="border-t border-white/10 text-center py-5 text-slate-500 text-sm">
+        © {new Date().getFullYear()} InsightGuard — Not financial advice.
       </footer>
-      <div id="page-transition" aria-hidden="true"></div>
+
+      <div id="page-transition" aria-hidden="true" />
     </div>
   )
 }
