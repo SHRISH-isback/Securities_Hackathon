@@ -35,6 +35,13 @@ def _check_financial_mismatch(text, symbol):
     """
     Compares 'high profits' claims in the announcement text against the
     Alpha Vantage EPS value. Returns a list of flags.
+
+    Args:
+        text (str): The announcement text to analyze.
+        symbol (str): The company's stock ticker symbol used to fetch financials.
+
+    Returns:
+        list[str]: A list of flag strings; empty if no mismatch is detected.
     """
     flags = []
     if not _HIGH_PROFIT_PATTERN.search(text):
