@@ -1,58 +1,54 @@
 import React from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { Shield, Activity, Info, Download, Share2 } from 'lucide-react'
+import CredibilityGauge from '../components/CredibilityGauge'
 import AuditTrail from '../components/AuditTrail'
 
+type Deduction = { reason: string; penalty: number; category: string }
 type Analysis = {
   score: number
   credibility: 'High' | 'Medium' | 'Low'
   flags: string[]
-  breakdown: { initial_score: number, deductions: { reason: string, penalty: number, category: string }[] }
-  ml_insights?: { suspicion_probability: number, top_terms: { term: string, weight: number }[] }
+  breakdown: { initial_score: number; deductions: Deduction[] }
+  ml_insights?: { suspicion_probability: number; top_terms: { term: string; weight: number }[] }
+  hype_score?: number
 }
 
-const monoFont: React.CSSProperties = {fontFamily: 'JetBrains Mono, ui-monospace, monospace'}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, icon, children }: { label: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-1">
-      <label className="text-slate-500 text-xs uppercase tracking-widest" style={monoFont}>{label}</label>
+    <div className="flex flex-col space-y-1">
+      <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
+        {icon}
+        {label}
+      </label>
       {children}
     </div>
   )
 }
 
-const inputBase: React.CSSProperties = {
-  ...monoFont,
-  background: 'transparent',
-  border: 'none',
-  borderBottom: '1px solid rgba(255,255,255,0.15)',
-  outline: 'none',
-  color: '#e2e8f0',
-  padding: '6px 0',
-  fontSize: '0.95rem',
-  width: '100%',
-}
-
-export default function Analyzer(){
-  const API_BASE = (import.meta as any).env?.VITE_API_BASE || ''
+export default function Analyzer() {
+  const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || ''
   const [params] = useSearchParams()
   const [companyName, setCompanyName] = React.useState(params.get('company_name') || '')
   const [symbol, setSymbol] = React.useState(params.get('symbol') || '')
   const [text, setText] = React.useState(params.get('announcement_text') || '')
   const [loading, setLoading] = React.useState(false)
   const [result, setResult] = React.useState<Analysis | null>(null)
+  const [error, setError] = React.useState<string | null>(null)
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true); setResult(null)
+    setLoading(true); setResult(null); setError(null)
     const fd = new FormData()
     fd.append('company_name', companyName)
     fd.append('symbol', symbol)
     fd.append('announcement_text', text)
-    try{
+    try {
       const r = await fetch(`${API_BASE}/api/analyze`, { method: 'POST', body: fd })
       const j = await r.json()
-      setResult(j)
+      if ('error' in j) { setError(j.error) } else { setResult(j) }
+    } catch (err) {
+      setError('Failed to reach the API. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -60,193 +56,143 @@ export default function Analyzer(){
 
   const shareUrl = `${location.origin}${location.pathname}?company_name=${encodeURIComponent(companyName)}&symbol=${encodeURIComponent(symbol)}&announcement_text=${encodeURIComponent(text)}`
 
-  const scoreColor = result?.credibility === 'High' ? '#34d399' : result?.credibility === 'Medium' ? '#fbbf24' : '#f87171'
+  const downloadJson = () => {
+    if (!result) return
+    const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = 'analysis.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url)
+  }
+
+  const copyLink = async () => { try { await navigator.clipboard.writeText(shareUrl) } catch {} }
 
   return (
-    <div className="min-h-screen px-4 py-12" style={{background:'#020617', backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)', backgroundSize:'28px 28px', backgroundAttachment:'fixed'}}>
-      <div className="max-w-5xl mx-auto">
-
-        {/* Two-column dashboard layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start mb-6">
-
-          {/* Left column */}
-          <div className="lg:col-span-2 flex flex-col gap-5">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block"></span>
-              <span className="text-emerald-400 text-xs uppercase tracking-widest" style={monoFont}>System Online</span>
-            </div>
-            <h2 className="text-white font-extrabold tracking-tighter leading-none" style={{fontSize:'clamp(2rem, 5vw, 3rem)'}}>
-              VALIDATE<br/>THE DATA
-            </h2>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              Submit a corporate announcement to run rule-based, financial, and ML analysis. Each submission generates a full credibility certificate.
-            </p>
-            <div className="mt-4 rounded-lg border border-white/10 bg-white/5 p-4 space-y-2">
-              {[
-                {label:'Rule Engine', value:'Active'},
-                {label:'Alpha Vantage', value:'Connected'},
-                {label:'ML Model', value:'Loaded'},
-              ].map(s => (
-                <div key={s.label} className="flex justify-between text-xs" style={monoFont}>
-                  <span className="text-slate-500">{s.label}</span>
-                  <span className="text-emerald-400">{s.value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right column – glassmorphism card */}
-          <div className="lg:col-span-3 rounded-2xl border border-white/10 p-7 backdrop-blur-xl" style={{background:'rgba(255,255,255,0.05)'}}>
-            <h3 className="text-white font-semibold text-base mb-6" style={monoFont}>New Analysis</h3>
-            <form onSubmit={onSubmit} className="flex flex-col gap-6">
-              <Field label="Company Name">
-                <input
-                  style={inputBase}
-                  value={companyName}
-                  onChange={e => setCompanyName(e.target.value)}
-                  required
-                  placeholder="e.g. Acme Corp"
-                  onFocus={e => (e.target.style.borderBottomColor = '#34d399')}
-                  onBlur={e => (e.target.style.borderBottomColor = 'rgba(255,255,255,0.15)')}
-                />
-              </Field>
-              <Field label="Stock Symbol">
-                <input
-                  style={inputBase}
-                  value={symbol}
-                  onChange={e => setSymbol(e.target.value)}
-                  required
-                  placeholder="e.g. ACME"
-                  onFocus={e => (e.target.style.borderBottomColor = '#34d399')}
-                  onBlur={e => (e.target.style.borderBottomColor = 'rgba(255,255,255,0.15)')}
-                />
-              </Field>
-              <Field label="Announcement Text">
-                <textarea
-                  style={{...inputBase, resize:'vertical', borderBottom:'1px solid rgba(255,255,255,0.15)'}}
-                  rows={6}
-                  value={text}
-                  onChange={e => setText(e.target.value)}
-                  required
-                  placeholder="Paste the corporate announcement here…"
-                  onFocus={e => (e.currentTarget.style.borderBottomColor = '#34d399')}
-                  onBlur={e => (e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.15)')}
-                />
-              </Field>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 rounded-lg font-semibold text-slate-900 text-sm transition-opacity disabled:opacity-50"
-                style={{background:'linear-gradient(90deg, #4ade80, #22d3ee)', ...monoFont}}
-              >
-                {loading ? 'Analyzing…' : 'Run Analysis →'}
-              </button>
-            </form>
-          </div>
-        </div>
-
-        {/* Audit Trail */}
-        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl px-4 py-2 mb-8">
-          <AuditTrail />
-        </div>
-
-        {/* Results */}
-        {result && !loading && (
-          <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-7">
-            {'error' in (result as any) ? (
-              <p className="text-red-400 text-sm" style={monoFont}>{(result as any).error}</p>
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-white font-semibold text-base" style={monoFont}>Credibility Certificate</h3>
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      className="px-4 py-1.5 rounded-lg border border-white/10 text-slate-300 text-xs hover:bg-white/10 transition-colors"
-                      style={monoFont}
-                      onClick={() => {
-                        const blob = new Blob([JSON.stringify(result, null, 2)], {type:'application/json'})
-                        const url = URL.createObjectURL(blob); const a = document.createElement('a');
-                        a.href = url; a.download = 'analysis.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-                      }}
-                    >
-                      Download JSON
-                    </button>
-                    <button
-                      type="button"
-                      className="px-4 py-1.5 rounded-lg border border-white/10 text-slate-300 text-xs hover:bg-white/10 transition-colors"
-                      style={monoFont}
-                      onClick={async () => { try{ await navigator.clipboard.writeText(shareUrl) }catch{} }}
-                    >
-                      Share Link
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Score */}
-                  <div className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-white/5 p-6">
-                    <div className="w-24 h-24 rounded-full border-4 flex items-center justify-center mb-3" style={{borderColor: scoreColor}}>
-                      <span className="text-3xl font-bold" style={{color: scoreColor, ...monoFont}}>{result.score}</span>
-                    </div>
-                    <span className="text-xs uppercase tracking-widest" style={{color: scoreColor, ...monoFont}}>{result.credibility} Credibility</span>
-                    {result.ml_insights && (
-                      <span className="mt-2 text-slate-500 text-xs" style={monoFont}>
-                        ML suspicion: {Math.round(result.ml_insights.suspicion_probability * 100)}%
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Flags */}
-                  <div className="md:col-span-2 flex flex-col gap-4">
-                    <div>
-                      <h4 className="text-slate-400 text-xs uppercase tracking-widest mb-2" style={monoFont}>Flags Raised</h4>
-                      {result.flags?.length ? (
-                        <ul className="space-y-1">
-                          {result.flags.map((f, i) => (
-                            <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
-                              <span className="text-amber-400 mt-0.5">⚠</span>
-                              <span>{f}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : <p className="text-emerald-400 text-sm">No red flags detected.</p>}
-                    </div>
-
-                    <div>
-                      <h4 className="text-slate-400 text-xs uppercase tracking-widest mb-2" style={monoFont}>Score Breakdown</h4>
-                      <div className="space-y-1">
-                        {result.breakdown.deductions.length === 0
-                          ? <p className="text-slate-500 text-xs" style={monoFont}>No deductions applied.</p>
-                          : result.breakdown.deductions.map((d, i) => (
-                            <div key={i} className="flex justify-between items-center text-xs py-1 border-b border-white/5">
-                              <span className="text-slate-400">{d.reason}</span>
-                              <span className="text-red-400 ml-4 shrink-0" style={monoFont}>-{d.penalty}</span>
-                            </div>
-                          ))
-                        }
-                      </div>
-                    </div>
-
-                    {result.ml_insights?.top_terms?.length ? (
-                      <div>
-                        <h4 className="text-slate-400 text-xs uppercase tracking-widest mb-2" style={monoFont}>ML Top Terms</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {result.ml_insights.top_terms.map((t, i) => (
-                            <span key={i} className="px-2 py-0.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300 text-xs" style={monoFont}>
-                              {t.term} · {Math.round(t.weight * 100)}%
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        )}
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold text-slate-100" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          Corporate Announcement Analyzer
+        </h1>
+        <p className="text-slate-400">Enter details for a real-time credibility analysis.</p>
       </div>
+
+      {/* Form */}
+      <div className="glass-card p-6">
+        <form onSubmit={onSubmit} className="flex flex-col space-y-6">
+          <Field label="Company Name" icon={<Shield className="w-4 h-4 text-blue-400" />}>
+            <input
+              className="glass-input"
+              placeholder="e.g. Acme Corp"
+              value={companyName}
+              onChange={e => setCompanyName(e.target.value)}
+              required
+            />
+          </Field>
+
+          <Field label="Stock Symbol" icon={<Activity className="w-4 h-4 text-blue-400" />}>
+            <input
+              className="glass-input"
+              placeholder="e.g. ACME"
+              value={symbol}
+              onChange={e => setSymbol(e.target.value)}
+              required
+            />
+          </Field>
+
+          <Field label="Announcement Text" icon={<Info className="w-4 h-4 text-blue-400" />}>
+            <textarea
+              className="glass-input resize-none"
+              rows={8}
+              placeholder="Paste the corporate announcement here..."
+              value={text}
+              onChange={e => setText(e.target.value)}
+              required
+            />
+          </Field>
+
+          <button type="submit" className="btn-primary justify-center" disabled={loading}>
+            {loading ? 'Analyzing…' : <><Shield className="w-4 h-4" /> Analyze Announcement</>}
+          </button>
+        </form>
+      </div>
+
+      {/* Loader */}
+      {loading && <div id="loader" />}
+
+      {/* Audit Trail */}
+      <div className="glass-card px-4 py-2">
+        <AuditTrail />
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="glass-card p-4 border-red-500/30 bg-red-500/10 text-red-300 text-sm">{error}</div>
+      )}
+
+      {/* Result */}
+      {result && !loading && (
+        <div className="space-y-4">
+          {/* Gauge + actions */}
+          <div className="glass-card p-6 flex flex-col items-center space-y-4">
+            <CredibilityGauge score={result.score} size={220} />
+            {result.hype_score !== undefined && (
+              <p className="text-xs text-slate-400">Hype Score: <span className="font-semibold text-yellow-400">{result.hype_score}</span></p>
+            )}
+            <div className="flex gap-3">
+              <button type="button" className="btn-ghost text-sm" onClick={downloadJson}>
+                <Download className="w-4 h-4" /> Download JSON
+              </button>
+              <button type="button" className="btn-ghost text-sm" onClick={copyLink}>
+                <Share2 className="w-4 h-4" /> Copy Link
+              </button>
+            </div>
+          </div>
+
+          {/* Flags */}
+          <div className="glass-card p-6 space-y-4">
+            <h3 className="font-semibold text-slate-200 flex items-center gap-2">
+              <Activity className="w-4 h-4 text-blue-400" /> Flags Raised
+            </h3>
+            {result.flags?.length
+              ? <ul className="space-y-2">{result.flags.map((f, i) => (
+                <li key={i} className="text-sm text-slate-300 flex items-start gap-2">
+                  <span className="text-red-400 mt-0.5">⚠</span>{f}
+                </li>
+              ))}</ul>
+              : <p className="text-sm text-slate-400">No specific red flags were detected.</p>
+            }
+          </div>
+
+          {/* Score breakdown */}
+          {result.breakdown.deductions.length > 0 && (
+            <div className="glass-card p-6 space-y-3">
+              <h3 className="font-semibold text-slate-200 flex items-center gap-2">
+                <Info className="w-4 h-4 text-blue-400" /> Score Breakdown
+              </h3>
+              <ul className="space-y-2">
+                {result.breakdown.deductions.map((d, i) => (
+                  <li key={i} className="flex items-center justify-between text-sm text-slate-300">
+                    <span>{d.reason}</span>
+                    <span className="badge ml-2 shrink-0">-{d.penalty}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* ML insights */}
+          {result.ml_insights?.top_terms?.length ? (
+            <div className="glass-card p-6 space-y-3">
+              <h3 className="font-semibold text-slate-200">ML Top Terms</h3>
+              <div className="flex flex-wrap gap-2">
+                {result.ml_insights.top_terms.map((t, i) => (
+                  <span className="chip" key={i}>{t.term} · {Math.round(t.weight * 100)}%</span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      )}
     </div>
   )
 }

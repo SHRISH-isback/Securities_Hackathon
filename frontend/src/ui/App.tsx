@@ -1,38 +1,36 @@
 import React from 'react'
 import { Outlet, Link, useLocation } from 'react-router-dom'
+import { Shield } from 'lucide-react'
 
 export default function App() {
   const location = useLocation()
+
   React.useEffect(() => {
     const el = document.getElementById('page-transition')
-    if (el) { el.classList.add('active'); setTimeout(()=> el.classList.remove('active'), 250) }
+    if (el) { el.classList.add('active'); setTimeout(() => el.classList.remove('active'), 250) }
   }, [location])
+
   return (
-    <div style={{minHeight:'100vh', display:'flex', flexDirection:'column', background:'#020617'}}>
-      <header style={{position:'sticky', top:0, zIndex:1000, borderBottom:'1px solid rgba(255,255,255,0.07)', backdropFilter:'blur(12px)', background:'rgba(2,6,23,0.8)'}}>
-        <nav className="max-w-6xl mx-auto flex items-center justify-between px-6 py-3">
-          <Link to="/" className="text-white font-bold text-lg" style={{fontFamily:'JetBrains Mono, monospace', letterSpacing:'-0.02em', textDecoration:'none'}}>
-            Insight<span style={{color:'#34d399'}}>Guard</span>
+    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
+      <header className="nav-glass px-6 md:px-10 py-4">
+        <nav className="max-w-6xl mx-auto flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 text-blue-400 font-bold text-xl" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <Shield className="w-6 h-6" />
+            InsightGuard
           </Link>
-          <ul className="flex gap-6 list-none m-0 p-0">
+          <ul className="hidden md:flex items-center gap-8 list-none m-0 p-0">
             {[
-              {to:'/', label:'Home', exact:true},
-              {to:'/analyzer', label:'Analyzer'},
-              {to:'/compare', label:'Compare'},
-              {to:'/about', label:'About'},
-            ].map(({to, label, exact}) => {
-              const active = exact ? location.pathname === to : location.pathname.startsWith(to)
+              { to: '/', label: 'Home', exact: true },
+              { to: '/analyzer', label: 'Analyzer' },
+              { to: '/compare', label: 'Compare' },
+              { to: '/about', label: 'About' },
+            ].map(({ to, label, exact }) => {
+              const isActive = exact ? location.pathname === to : location.pathname.startsWith(to)
               return (
                 <li key={to}>
                   <Link
                     to={to}
-                    style={{
-                      color: active ? '#34d399' : '#94a3b8',
-                      textDecoration: 'none',
-                      fontSize: '0.875rem',
-                      fontWeight: 500,
-                      transition: 'color 0.2s',
-                    }}
+                    className={`text-sm font-medium transition-colors ${isActive ? 'text-blue-400' : 'text-slate-400 hover:text-slate-100'}`}
                   >
                     {label}
                   </Link>
@@ -42,13 +40,16 @@ export default function App() {
           </ul>
         </nav>
       </header>
-      <main style={{flex:1}}>
+
+      <main className="flex-1 px-4 py-8">
         <Outlet />
       </main>
-      <footer style={{background:'rgba(2,6,23,0.9)', borderTop:'1px solid rgba(255,255,255,0.07)', padding:'20px', textAlign:'center'}}>
-        <p style={{color:'#475569', fontSize:'0.75rem', fontFamily:'JetBrains Mono, monospace', margin:0}}>© InsightGuard — SEBI Safe Space Initiative</p>
+
+      <footer className="border-t border-white/10 text-center py-5 text-slate-500 text-sm">
+        © {new Date().getFullYear()} InsightGuard — Not financial advice.
       </footer>
-      <div id="page-transition" aria-hidden="true"></div>
+
+      <div id="page-transition" aria-hidden="true" />
     </div>
   )
 }

@@ -1,64 +1,93 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { Shield, Activity, TrendingUp, Play } from 'lucide-react'
 
-export default function Home(){
-  const legit = '/analyzer?company_name=Acme%20Corp&symbol=ACME&announcement_text=' + encodeURIComponent('We are pleased to announce a new strategic partnership with Globex Inc. Quarterly earnings in line with expectations.')
-  const suspicious = '/analyzer?company_name=Alpha%20Invest&symbol=ALPH&announcement_text=' + encodeURIComponent('Unprecedented returns guaranteed! Act now for insider opportunity to skyrocket your wealth with no risk.')
+const legit = '/analyzer?company_name=Acme%20Corp&symbol=ACME&announcement_text=' +
+  encodeURIComponent('We are pleased to announce a new strategic partnership with Globex Inc. Quarterly earnings in line with expectations.')
+const suspicious = '/analyzer?company_name=Alpha%20Invest&symbol=ALPH&announcement_text=' +
+  encodeURIComponent('Unprecedented returns guaranteed! Act now for insider opportunity to skyrocket your wealth with no risk.')
+
+const features = [
+  {
+    icon: <Activity className="w-6 h-6 text-blue-400" />,
+    title: 'Real-Time Analysis',
+    desc: 'Live financial data and news APIs assess credibility of corporate announcements.',
+  },
+  {
+    icon: <TrendingUp className="w-6 h-6 text-purple-400" />,
+    title: 'Data-Driven Scoring',
+    desc: 'Our engine produces a weighted credibility score based on multiple factors.',
+  },
+  {
+    icon: <Shield className="w-6 h-6 text-green-400" />,
+    title: 'Investor Protection',
+    desc: "Aligned with SEBI's Safe Space initiative to safeguard retail investors.",
+  },
+  {
+    icon: <Play className="w-6 h-6 text-yellow-400" />,
+    title: 'Try Examples',
+    desc: 'Jump in with sample announcements to see the analyzer in action.',
+    extra: (
+      <div className="flex gap-3 mt-3">
+        <Link className="btn-ghost text-xs" to={legit}>Legit Example</Link>
+        <Link className="btn-ghost text-xs" to={suspicious}>Suspicious Example</Link>
+      </div>
+    ),
+  },
+]
+
+export default function Home() {
   return (
-    <div className="min-h-screen" style={{background:'#020617', backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)', backgroundSize:'28px 28px', backgroundAttachment:'fixed'}}>
-      {/* Hero Section */}
-      <section className="flex flex-col items-center justify-center text-center px-6 py-28">
+    <div className="space-y-12 max-w-5xl mx-auto">
+      {/* Hero */}
+      <div
+        className="text-center py-20 px-6 rounded-2xl border border-white/10 backdrop-blur-lg space-y-6"
+        style={{
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(135deg, rgba(37,99,235,0.15), rgba(124,58,237,0.15))',
+          backgroundSize: '28px 28px, 100% 100%',
+        }}
+      >
         {/* Top Badge */}
-        <span className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs" style={{fontFamily:'JetBrains Mono, monospace'}}>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block"></span>
+        <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-4 py-1.5 rounded-full text-emerald-300 text-xs font-mono">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
           Powered by Alpha Vantage &amp; SEBI Safe Space
-        </span>
+        </div>
 
-        {/* Headline */}
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-tight max-w-4xl mb-6">
+        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-100 leading-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
           Your First Line of Defense Against{' '}
-          <span style={{background:'linear-gradient(90deg, #4ade80, #22d3ee)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text'}}>
+          <span style={{ background: 'linear-gradient(90deg, #4ade80, #22d3ee)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
             Securities Fraud.
           </span>
         </h1>
 
-        <p className="text-slate-400 text-lg max-w-xl mb-10 leading-relaxed">
-          AI-powered analysis of corporate announcements. Detect pump-and-dump schemes, financial mismatches, and deceptive language in seconds.
+        <p className="text-lg text-slate-400 max-w-xl mx-auto">
+          Analyze corporate announcements with ML-powered credibility scoring. Detect pump-and-dump schemes, financial mismatches, and deceptive language in seconds.
         </p>
 
         <div className="flex flex-wrap gap-4 justify-center">
-          <Link to="/analyzer" className="px-7 py-3 rounded-lg font-semibold text-slate-900 text-base" style={{background:'linear-gradient(90deg, #4ade80, #22d3ee)'}}>
-            Analyze an Announcement
+          <Link className="btn-primary" to="/analyzer">
+            <Shield className="w-5 h-5" /> Analyze an Announcement
           </Link>
-          <Link to={suspicious} className="px-7 py-3 rounded-lg font-semibold text-white text-base border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+          <Link className="btn-ghost" to={suspicious}>
             Try Suspicious Example
           </Link>
         </div>
-      </section>
+      </div>
 
       {/* Features */}
-      <section className="max-w-5xl mx-auto px-6 pb-24">
-        <h2 className="text-center text-slate-400 text-xs uppercase tracking-widest mb-10" style={{fontFamily:'JetBrains Mono, monospace'}}>How InsightGuard Protects You</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {[
-            {title:'Real-Time Analysis', body:'Live Alpha Vantage financials and news cross-referencing on every scan.'},
-            {title:'ML Fraud Detection', body:'Scikit-Learn model trained to detect pump-and-dump phrases with n-gram logic.'},
-            {title:'SEBI Safe Space', body:"Aligned with SEBI's investor-protection initiative for retail market safety."},
-          ].map(f => (
-            <div key={f.title} className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
-              <div className="w-8 h-8 rounded-md bg-emerald-500/20 flex items-center justify-center mb-4">
-                <span className="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span>
-              </div>
-              <h3 className="text-white font-semibold text-base mb-2">{f.title}</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">{f.body}</p>
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-slate-200 text-center" style={{ fontFamily: 'Poppins, sans-serif' }}>How We Protect You</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {features.map(({ icon, title, desc, extra }) => (
+            <div key={title} className="glass-card p-6 space-y-2">
+              {icon}
+              <h3 className="font-semibold text-slate-200">{title}</h3>
+              <p className="text-sm text-slate-400 text-left">{desc}</p>
+              {extra}
             </div>
           ))}
         </div>
-        <div className="mt-8 flex justify-center gap-6">
-          <Link to={legit} className="text-slate-400 text-sm underline underline-offset-4 hover:text-white transition-colors">Legit Example →</Link>
-          <Link to={suspicious} className="text-slate-400 text-sm underline underline-offset-4 hover:text-white transition-colors">Suspicious Example →</Link>
-        </div>
-      </section>
+      </div>
     </div>
   )
 }

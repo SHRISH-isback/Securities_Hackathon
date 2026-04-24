@@ -1,91 +1,101 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+import numpy as np
 import pandas as pd
+
 
 class AnnouncementClassifier:
     """
-    A mock ML model to classify announcements.
-    
-    In a real-world scenario, this class would load a pre-trained, more 
-    sophisticated model. For this project, we train a simple model on a
-    small, representative dataset to demonstrate the integration of ML.
+    ML model to classify corporate announcements as normal or suspicious.
+
+    Uses a sklearn Pipeline with a TfidfVectorizer (capturing uni-, bi-, and
+    tri-grams to catch multi-word "hype" phrases) and a balanced Logistic
+    Regression to handle the fraud-class imbalance.
     """
+
     def __init__(self):
-        self.vectorizer = TfidfVectorizer(stop_words='english', ngram_range=(1, 3))
-        self.model = LogisticRegression(class_weight='balanced')
+        self.pipeline = Pipeline([
+            ("tfidf", TfidfVectorizer(
+                stop_words="english",
+                ngram_range=(1, 3),
+                max_features=5000,
+                sublinear_tf=True,
+            )),
+            ("clf", LogisticRegression(
+                class_weight="balanced",
+                max_iter=1000,
+                solver="lbfgs",
+                random_state=42,
+            )),
+        ])
         self._train_model()
 
     def _train_model(self):
         """
-        Trains the model on a small, hardcoded dataset.
-        
-        The data represents examples of "normal" (label 0) and "suspicious" (label 1)
-        announcements. The vocabulary is intentionally biased to make the model
-        sensitive to keywords often found in fraudulent statements.
+        Trains the pipeline on a small, representative dataset.
+
+        Label 0 = normal / legitimate announcement.
+        Label 1 = suspicious / potentially fraudulent.
         """
-        # Sample data: 1 for suspicious, 0 for normal
         training_data = {
-            'text': [
+            "text": [
+                # Normal (0)
                 "Company reports record profits and expects strong future growth.",
                 "We are pleased to announce a new strategic partnership.",
                 "Quarterly earnings are in line with market expectations.",
                 "Our new product launch has been a resounding success.",
+                "Revenue for Q3 rose 8 percent year-over-year, driven by strong demand.",
+                "The board has approved a share buyback programme of up to 500 million.",
+                "Operating margins improved by 2 percentage points to 18 percent.",
+                "We have signed a definitive agreement to acquire the target company.",
+                # Suspicious (1)
                 "Unprecedented returns guaranteed, this is a once-in-a-lifetime opportunity.",
                 "Massive profits expected, stock value to skyrocket, insider information.",
                 "Guaranteed high returns with no risk, act now before it's too late.",
-                "This secret investment is sure to triple in value, limited slots available."
+                "This secret investment is sure to triple in value, limited slots available.",
+                "Moon bound rocket ship, explosive growth guaranteed for early investors.",
+                "Don't miss out on this explosive opportunity, buy before it's too late.",
+                "Insiders confirm this stock will 10x, act now for guaranteed moon profits.",
+                "Revolutionary breakthrough will skyrocket the stock to unprecedented highs.",
             ],
-            'label': [0, 0, 0, 0, 1, 1, 1, 1]
+            "label": [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
         }
         df = pd.DataFrame(training_data)
-        
-        X = self.vectorizer.fit_transform(df['text'])
-        y = df['label']
-        self.model.fit(X, y)
+        self.pipeline.fit(df["text"], df["label"])
 
     def predict_suspicion(self, text: str) -> float:
         """
-        Predicts the probability that an announcement is suspicious.
-
-        Args:
-            text: The announcement text to analyze.
-
-        Returns:
-            A float between 0 and 1, where 1 indicates a high probability
-            of being suspicious.
+        Returns the probability (0–1) that an announcement is suspicious.
         """
-        text_vector = self.vectorizer.transform([text])
-        # Predict the probability of the "suspicious" class (label 1)
-        probability = self.model.predict_proba(text_vector)[0][1]
-        return probability
+        return float(self.pipeline.predict_proba([text])[0][1])
 
     def explain_top_terms(self, text: str, top_k: int = 5):
         """
-        Returns the top contributing terms for the suspicious class using a
-        simple linear model explanation: term_weight * tfidf_value.
-
-        Args:
-            text: The announcement text to analyze.
-            top_k: Number of top terms to return.
+        Returns the top contributing n-gram terms for the suspicious class.
 
         Returns:
-            List of dicts: [{ 'term': str, 'weight': float }]
+            List of dicts: [{ 'term': str, 'weight': float }]  (weight normalised 0–1)
         """
-        text_vector = self.vectorizer.transform([text])
-        # For LogisticRegression, coef_[0] corresponds to the positive class weights if binary
-        class_index = 1  # suspicious class
-        coefs = self.model.coef_[0]
-        feature_names = self.vectorizer.get_feature_names_out()
+        vectorizer: TfidfVectorizer = self.pipeline.named_steps["tfidf"]
+        clf: LogisticRegression = self.pipeline.named_steps["clf"]
 
-        # Compute contribution per feature: weight * value
+        text_vector = vectorizer.transform([text])
+        coefs = clf.coef_[0]
+        feature_names = vectorizer.get_feature_names_out()
+
         contributions = text_vector.multiply(coefs).toarray()[0]
-
-        # Select top positive contributions
-        indexed = [(feature_names[i], contributions[i]) for i in range(len(feature_names)) if contributions[i] > 0]
+        indexed = [
+            (feature_names[i], contributions[i])
+            for i in range(len(feature_names))
+            if contributions[i] > 0
+        ]
         indexed.sort(key=lambda x: x[1], reverse=True)
         top = indexed[:top_k]
 
-        # Normalize weights to 0..1 for display
         max_contrib = top[0][1] if top else 1.0
-        normalized = [{"term": term, "weight": (contrib / max_contrib) if max_contrib > 0 else 0.0} for term, contrib in top]
-        return normalized
+        return [
+            {"term": term, "weight": float(contrib / max_contrib) if max_contrib > 0 else 0.0}
+            for term, contrib in top
+        ]
+
