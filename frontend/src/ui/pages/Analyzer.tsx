@@ -2,6 +2,7 @@ import React from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Shield, Activity, Info, Download, Share2 } from 'lucide-react'
 import CredibilityGauge from '../components/CredibilityGauge'
+import AuditTrail from '../components/AuditTrail'
 
 type Deduction = { reason: string; penalty: number; category: string }
 type Analysis = {
@@ -117,6 +118,11 @@ export default function Analyzer() {
 
       {/* Loader */}
       {loading && <div id="loader" />}
+
+      {/* Audit Trail */}
+      <div className="glass-card px-4 py-2">
+        <AuditTrail />
+      </div>
 
       {/* Error */}
       {error && (

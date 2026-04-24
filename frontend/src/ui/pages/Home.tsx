@@ -40,19 +40,38 @@ export default function Home() {
   return (
     <div className="space-y-12 max-w-5xl mx-auto">
       {/* Hero */}
-      <div className="text-center py-20 px-6 rounded-2xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-white/10 backdrop-blur-lg space-y-6">
-        <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-1.5 rounded-full text-blue-300 text-sm font-medium">
-          <Shield className="w-4 h-4" /> AI-Powered Securities Fraud Detection
+      <div
+        className="text-center py-20 px-6 rounded-2xl border border-white/10 backdrop-blur-lg space-y-6"
+        style={{
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(135deg, rgba(37,99,235,0.15), rgba(124,58,237,0.15))',
+          backgroundSize: '28px 28px, 100% 100%',
+        }}
+      >
+        {/* Top Badge */}
+        <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-4 py-1.5 rounded-full text-emerald-300 text-xs font-mono">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+          Powered by Alpha Vantage &amp; SEBI Safe Space
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-slate-100" style={{ fontFamily: 'Poppins, sans-serif' }}>
-          Welcome to InsightGuard
+
+        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-100 leading-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          Your First Line of Defense Against{' '}
+          <span style={{ background: 'linear-gradient(90deg, #4ade80, #22d3ee)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            Securities Fraud.
+          </span>
         </h1>
+
         <p className="text-lg text-slate-400 max-w-xl mx-auto">
-          Your first line of defense against securities fraud. Analyze corporate announcements with ML-powered credibility scoring.
+          Analyze corporate announcements with ML-powered credibility scoring. Detect pump-and-dump schemes, financial mismatches, and deceptive language in seconds.
         </p>
-        <Link className="btn-primary" to="/analyzer">
-          <Shield className="w-5 h-5" /> Analyze an Announcement
-        </Link>
+
+        <div className="flex flex-wrap gap-4 justify-center">
+          <Link className="btn-primary" to="/analyzer">
+            <Shield className="w-5 h-5" /> Analyze an Announcement
+          </Link>
+          <Link className="btn-ghost" to={suspicious}>
+            Try Suspicious Example
+          </Link>
+        </div>
       </div>
 
       {/* Features */}
